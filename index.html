@@ -116,14 +116,14 @@ function showResult() {
     const percent = Math.round((correct / 10) * 100);
     let wrongHtml = "";
     if (wrongAnswers.length > 0) {
-        wrongHtml = "<h3>Pogrešno:</h3><ul>" +
+        wrongHtml = "<h3>Wrong:</h3><ul>" +
                     wrongAnswers.map(x => `<li>${x}</li>`).join("") +
                     "</ul>";
     }
     document.getElementById("content").innerHTML = `
-        <h2>Rezultat: ${percent}%</h2>
+        <h2>Result: ${percent}%</h2>
         ${wrongHtml}
-        <button onclick="restart()">Novi kviz</button>
+        <button onclick="restart()">New quiz</button>
     `;
 }
 
@@ -142,4 +142,5 @@ function shuffle(arr) {
 
 </body>
 </html>
+
 
