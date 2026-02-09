@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="UTF-8">
+<title>Njemački – članci</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background: #f4f4f4;
+        padding: 20px;
+    }
+    .box {
+        max-width: 500px;
+        background: white;
+        padding: 20px;
+        margin: auto;
+        border-radius: 8px;
+        text-align: center;
+    }
+    button {
+        padding: 10px;
+        margin: 5px;
+        width: 100%;
+        cursor: pointer;
+        font-size: 16px;
+    }
+</style>
+</head>
+<body>
+
+<div class="box">
+    <h1>Vježbanje njemačkog</h1>
+    <div id="content">Učitavanje...</div>
+</div>
+
+<script>
+let words = [];
+let selected = [];
+let index = 0;
+let quizIndex = 0;
+let correct = 0;
+
+fetch("Wörter.txt")
+  .then(r => r.text())
+  .then(text => {
+      const lines = text.split("\n");
+      words = lines.map(l => {
+          const p = l.trim().split(/\s+/);
+          return { adj: p[0], noun: p[1], article: p[2] };
+      }).filter(w => w.noun);
+
+      selected = shuffle(words).slice(0, 10);
+      showPair();
+  })
+  .catch(() => {
+      document.getElementById("content").innerText =
+          "Greška pri učitavanju Wörter.txt";
+  });
+
+function showPair() {
+    if (index >= 10) return startQuiz();
+    const w = selected[index];
+    document.getElementById("content").innerHTML = `
+        <h2>${w.adj} ${w.noun}</h2>
+        <button onclick="nextPair()">Next</button>
+    `;
+}
+
+function nextPair() {
+    index++;
+    showPair();
+}
+
+function startQuiz() {
+    quizIndex = 0;
+    correct = 0;
+    showQuestion();
+}
+
+function showQuestion() {
+    if (quizIndex >= 10) return showResult();
+    const w = selected[quizIndex];
+    document.getElementById("content").innerHTML = `
+        <h2>${w.noun}</h2>
+        <p>Koji je član?</p>
+        <button onclick="answer('der')">der</button>
+        <button onclick="answer('die')">die</button>
+        <button onclick="answer('das')">das</button>
+    `;
+}
+
+function answer(a) {
+    if (a === selected[quizIndex].article) correct++;
+    quizIndex++;
+    showQuestion();
+}
+
+function showResult() {
+    const percent = Math.round((correct / 10) * 100);
+    document.getElementById("content").innerHTML = `
+        <h2>Rezultat: ${percent}%</h2>
+        <button onclick="restart()">Novi kviz</button>
+    `;
+}
+
+function restart() {
+    index = 0;
+    selected = shuffle(words).slice(0, 10);
+    showPair();
+}
+
+function shuffle(arr) {
+    return [...arr].sort(() => Math.random() - 0.5);
+}
+</script>
+
+</body>
+</html>
