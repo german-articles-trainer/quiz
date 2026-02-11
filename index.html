@@ -4,88 +4,141 @@
 <meta charset="UTF-8">
 <title>German Quiz</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Ljepši font -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
 <style>
-/* GENERAL STYLING */
 body {
-    font-family: Arial, sans-serif;
-    background: #f4f4f4;
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(135deg, #eef2ff, #f8fafc);
     padding: 20px;
     transition: background 0.3s, color 0.3s;
 }
+
 .box {
-    max-width: 600px;
+    max-width: 620px;
     background: white;
-    padding: 20px;
+    padding: 24px;
     margin: auto;
-    border-radius: 10px;
+    border-radius: 16px;
     text-align: center;
-    transition: background 0.3s, color 0.3s;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    position: relative;
 }
+
+h1 {
+    margin-top: 5px;
+    font-weight: 700;
+}
+
+/* GUMBI */
 button {
-    padding: 10px;
-    margin: 5px;
+    padding: 12px;
+    margin: 6px 0;
     width: 100%;
     font-size: 16px;
     cursor: pointer;
-}
-h2 {
-    margin-bottom: 20px;
-}
-ul {
-    text-align: left;
-    padding-left: 20px;
-}
-
-/* DARK MODE STYLING */
-body.dark-mode {
-    background: #121212;
-    color: #f0f0f0;
-}
-body.dark-mode .box {
-    background: #1e1e1e;
-    color: #f0f0f0;
-}
-button {
     border: none;
-    border-radius: 5px;
-    background: #007bff;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #4f46e5, #6366f1);
     color: white;
-    transition: background 0.3s;
-}
-button:hover {
-    background: #0056b3;
+    transition: all 0.2s;
+    font-weight: 600;
 }
 
-/* RESPONSIVE DESIGN */
+button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(79,70,229,0.25);
+}
+
+.secondary {
+    background: #e5e7eb;
+    color: #111;
+}
+
+/* Progress */
+.progress-wrapper {
+    margin: 10px 0 18px 0;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #e5e7eb;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.progress-text {
+    font-size: 14px;
+    margin-top: 6px;
+    color: #555;
+}
+
+/* Dark mode – diskretni gumb */
+.dark-toggle {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: auto;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: #111;
+}
+
+body.dark-mode {
+    background: #0f172a;
+    color: #f1f5f9;
+}
+
+body.dark-mode .box {
+    background: #111827;
+    color: #f1f5f9;
+}
+
+body.dark-mode .progress-bar {
+    background: #1f2937;
+}
+
 @media (max-width: 500px) {
-    .box {
-        padding: 15px;
-    }
-    button {
-        font-size: 14px;
-        padding: 8px;
-    }
+    .box { padding: 16px; }
+    button { font-size: 15px; }
 }
 </style>
 </head>
 <body>
 
 <div class="box">
+    <button class="dark-toggle secondary" onclick="toggleDarkMode()">Dark</button>
+
     <h1>German Practice</h1>
-    <button onclick="toggleDarkMode()">Toggle Dark Mode</button>
+
+    <div class="progress-wrapper">
+        <div class="progress-bar">
+            <div id="progress" class="progress-fill"></div>
+        </div>
+        <div id="progressText" class="progress-text"></div>
+    </div>
+
     <div id="content">Loading...</div>
 </div>
 
 <script>
-// DATA AND GAME VARIABLES
 let words = [];
 let selected = [];
 let index = 0;
 let quizIndex = 0;
 let correct = 0;
 let wrongAnswers = [];
+let QUIZ_SIZE = 10;
 
-// LOAD WORDS FROM EXTERNAL FILE
 fetch("Woerter.txt")
   .then(r => r.text())
   .then(text => {
@@ -95,21 +148,31 @@ fetch("Woerter.txt")
           return { adj: p[0], noun: p[1], article: p[2] };
       }).filter(w => w.noun);
 
-      selected = shuffle(words).slice(0, 10);
+      QUIZ_SIZE = Math.min(10, words.length);
+      selected = shuffle(words).slice(0, QUIZ_SIZE);
       showPair();
   })
   .catch(() => {
       document.getElementById("content").innerText =
-          "Error loading Wörter.txt";
+          "Error loading Woerter.txt";
   });
 
-// SHOW ADJECTIVE + NOUN PAIRS
+function updateProgress(current) {
+    const percent = Math.round((current / QUIZ_SIZE) * 100);
+    document.getElementById("progress").style.width = percent + "%";
+    document.getElementById("progressText").innerText =
+        `Pitanje ${Math.min(current + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`;
+}
+
 function showPair() {
-    if (index >= 10) return startQuiz();
+    updateProgress(index);
+
+    if (index >= QUIZ_SIZE) return startQuiz();
     const w = selected[index];
+
     document.getElementById("content").innerHTML = `
         <h2>${w.adj} ${w.noun}</h2>
-        <button onclick="nextPair()">Next</button>
+        <button onclick="nextPair()">Dalje</button>
     `;
 }
 
@@ -118,7 +181,6 @@ function nextPair() {
     showPair();
 }
 
-// START QUIZ
 function startQuiz() {
     quizIndex = 0;
     correct = 0;
@@ -126,20 +188,21 @@ function startQuiz() {
     showQuestion();
 }
 
-// SHOW QUIZ QUESTION
 function showQuestion() {
-    if (quizIndex >= 10) return showResult();
+    updateProgress(quizIndex);
+
+    if (quizIndex >= QUIZ_SIZE) return showResult();
     const w = selected[quizIndex];
+
     document.getElementById("content").innerHTML = `
         <h2>${w.noun}</h2>
-        <p>Which article does it have?</p>
+        <p>Koji je član?</p>
         <button onclick="answer('der')">der</button>
         <button onclick="answer('die')">die</button>
         <button onclick="answer('das')">das</button>
     `;
 }
 
-// HANDLE ANSWER
 function answer(a) {
     const w = selected[quizIndex];
     if (a === w.article) {
@@ -151,40 +214,49 @@ function answer(a) {
     showQuestion();
 }
 
-// SHOW RESULT AND WRONG ANSWERS
 function showResult() {
-    const percent = Math.round((correct / 10) * 100);
+    updateProgress(QUIZ_SIZE);
+
+    const percent = Math.round((correct / QUIZ_SIZE) * 100);
+
     let wrongHtml = "";
     if (wrongAnswers.length > 0) {
-        wrongHtml = "<h3>Wrong Answers:</h3><ul>" +
+        wrongHtml = "<h3>Pogreške:</h3><ul>" +
                     wrongAnswers.map(x => `<li>${x}</li>`).join("") +
                     "</ul>";
     }
+
     document.getElementById("content").innerHTML = `
-        <h2>Score: ${percent}%</h2>
+        <h2>Rezultat: ${percent}%</h2>
         ${wrongHtml}
-        <button onclick="restart()">New Quiz</button>
+        <button onclick="restart()">Novi kviz</button>
     `;
 }
 
-// RESTART QUIZ
 function restart() {
     index = 0;
-    selected = shuffle(words).slice(0, 10);
+    selected = shuffle(words).slice(0, QUIZ_SIZE);
     showPair();
 }
 
-// SHUFFLE ARRAY
 function shuffle(arr) {
-    return [...arr].sort(() => Math.random() - 0.5);
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+    }
+    return a;
 }
 
-// TOGGLE DARK MODE
 function toggleDarkMode() {
     document.body.classList.toggle("dark-mode");
+    localStorage.setItem("dark", document.body.classList.contains("dark-mode"));
+}
+
+if (localStorage.getItem("dark") === "true") {
+    document.body.classList.add("dark-mode");
 }
 </script>
 
 </body>
 </html>
-
