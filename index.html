@@ -9,6 +9,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 
 <style>
+/* feedback colors */
+button.correct { background: linear-gradient(135deg, #16a34a, #22c55e) !important; }
+button.wrong { background: linear-gradient(135deg, #dc2626, #ef4444) !important; }
+
 body {
     font-family: 'Inter', Arial, sans-serif;
     background: linear-gradient(135deg, #eef2ff, #f8fafc);
@@ -116,9 +120,9 @@ body.dark-mode .progress-bar {
 <body>
 
 <div class="box">
-    <button class="dark-toggle secondary" onclick="toggleDarkMode()">Dark</button>
+    <button id="themeBtn" class="dark-toggle secondary" onclick="toggleDarkMode()" title="Toggle dark mode">🌙</button>
 
-    <h1>German Practice</h1>
+    <h1>German Articles Trainer</h1>
 
     <div class="progress-wrapper">
         <div class="progress-bar">
@@ -161,7 +165,7 @@ function updateProgress(current) {
     const percent = Math.round((current / QUIZ_SIZE) * 100);
     document.getElementById("progress").style.width = percent + "%";
     document.getElementById("progressText").innerText =
-        `Pitanje ${Math.min(current + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`;
+        `Question ${Math.min(current + 1, QUIZ_SIZE)} / ${QUIZ_SIZE}`;
 }
 
 function showPair() {
@@ -172,7 +176,7 @@ function showPair() {
 
     document.getElementById("content").innerHTML = `
         <h2>${w.adj} ${w.noun}</h2>
-        <button onclick="nextPair()">Dalje</button>
+        <button onclick="nextPair()">Next</button>
     `;
 }
 
@@ -196,22 +200,34 @@ function showQuestion() {
 
     document.getElementById("content").innerHTML = `
         <h2>${w.noun}</h2>
-        <p>Koji je član?</p>
-        <button onclick="answer('der')">der</button>
-        <button onclick="answer('die')">die</button>
-        <button onclick="answer('das')">das</button>
+        <p>Select the correct article</p>
+        <button onclick="answer('der', this)">der</button>
+        <button onclick="answer('die', this)">die</button>
+        <button onclick="answer('das', this)">das</button>
     `;
 }
 
-function answer(a) {
+function answer(a, btn) {
     const w = selected[quizIndex];
-    if (a === w.article) {
+
+    const correctAnswer = a === w.article;
+
+    // visual feedback
+    if (btn) {
+        btn.classList.add(correctAnswer ? 'correct' : 'wrong');
+    }
+
+    if (correctAnswer) {
         correct++;
     } else {
         wrongAnswers.push(`${w.adj} ${w.noun} → ${w.article}`);
     }
-    quizIndex++;
-    showQuestion();
+
+    // wait a bit so user can see color
+    setTimeout(() => {
+        quizIndex++;
+        showQuestion();
+    }, 500);
 }
 
 function showResult() {
@@ -221,7 +237,7 @@ function showResult() {
 
     let wrongHtml = "";
     if (wrongAnswers.length > 0) {
-        wrongHtml = "<h3>Pogreške:</h3><ul>" +
+        wrongHtml = "<h3>Mistakes:</h3><ul>" +
                     wrongAnswers.map(x => `<li>${x}</li>`).join("") +
                     "</ul>";
     }
@@ -229,7 +245,7 @@ function showResult() {
     document.getElementById("content").innerHTML = `
         <h2>Rezultat: ${percent}%</h2>
         ${wrongHtml}
-        <button onclick="restart()">Novi kviz</button>
+        <button onclick="restart()">New Quiz</button>
     `;
 }
 
@@ -249,12 +265,18 @@ function shuffle(arr) {
 }
 
 function toggleDarkMode() {
-    document.body.classList.toggle("dark-mode");
-    localStorage.setItem("dark", document.body.classList.contains("dark-mode"));
+    const isDark = document.body.classList.toggle("dark-mode");
+    localStorage.setItem("dark", isDark);
+
+    // change icon
+    const btn = document.getElementById("themeBtn");
+    if (btn) btn.innerText = isDark ? "☀️" : "🌙";
 }
 
 if (localStorage.getItem("dark") === "true") {
     document.body.classList.add("dark-mode");
+    const b = document.getElementById("themeBtn");
+    if (b) b.innerText = "☀️";
 }
 </script>
 
