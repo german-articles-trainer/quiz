@@ -115,6 +115,28 @@ body.dark-mode .progress-bar {
     .box { padding: 16px; }
     button { font-size: 15px; }
 }
+/* Modal */
+.modal {
+  display:none;
+  position:fixed;
+  left:0; top:0;
+  width:100%; height:100%;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(3px);
+  z-index:999;
+}
+.modal-content{
+  background:white;
+  max-width:600px;
+  margin:8% auto;
+  padding:20px;
+  border-radius:14px;
+  text-align:left;
+  max-height:80vh;
+  overflow:auto;
+}
+body.dark-mode .modal-content{background:#111827;color:#f1f5f9;}
+.close-btn{float:right;cursor:pointer;font-size:18px;}
 </style>
 </head>
 <body>
@@ -132,6 +154,10 @@ body.dark-mode .progress-bar {
     </div>
 
     <div id="content">Loading...</div>
+
+    <div style="margin-top:12px;">
+        <button class="secondary" style="width:auto;padding:8px 12px;" onclick="openMethod()">About the Method</button>
+    </div>
 </div>
 
 <script>
@@ -278,7 +304,44 @@ if (localStorage.getItem("dark") === "true") {
     const b = document.getElementById("themeBtn");
     if (b) b.innerText = "☀️";
 }
+
+function openMethod(){
+  document.getElementById('methodModal').style.display='block';
+}
+function closeMethod(){
+  document.getElementById('methodModal').style.display='none';
+}
+
+// close when clicking outside
+window.onclick=function(e){
+  const m=document.getElementById('methodModal');
+  if(e.target===m) m.style.display='none';
+}
 </script>
+
+
+<div id="methodModal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeMethod()">✕</span>
+    <h2>Adjective Bridge Method™</h2>
+
+    <p><b>Commercial description</b></p>
+    <p>Adjective Bridge Method™ teaches German articles without forcing you to memorize der/die/das. Instead of dry repetition, every noun is learned through a highly associative adjective–noun pair in singular nominative form.</p>
+
+    <p>The article is intentionally omitted during the learning phase so the brain can attach gender naturally to meaning, not to grammar labels. Through exposure → recall → correction cycles, learners develop intuitive gender sense similar to native acquisition.</p>
+
+    <hr>
+
+    <p><b>Method Definition</b></p>
+    <ul>
+      <li>Adjective + noun pairs, singular nominative</li>
+      <li>Indefinite article intentionally omitted</li>
+      <li>Strong semantic association between adjective and noun</li>
+      <li>Two phases: associative exposure → active recall</li>
+      <li>Error‑based reinforcement</li>
+    </ul>
+  </div>
+</div>
 
 </body>
 </html>
